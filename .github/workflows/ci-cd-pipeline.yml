@@ -48,11 +48,31 @@ jobs:
       env:
         KUBECONFIG: ${{ secrets.KUBECONFIG }}
       run: |
-        echo "$KUBECONFIG" > kubeconfig.yaml
-        kubectl --kubeconfig=kubeconfig.yaml apply -f kubernetes/green/trading-deployment.yaml
-        kubectl --kubeconfig=kubeconfig.yaml apply -f kubernetes/green/wallet-deployment.yaml
-        kubectl --kubeconfig=kubeconfig.yaml apply -f kubernetes/green/account-management-deployment.yaml
-        kubectl --kubeconfig=kubeconfig.yaml apply -f kubernetes/green/api-gateway-deployment.yaml
+          echo "$KUBECONFIG" > kubeconfig.yaml
+          
+          # List contents of kubernetes/green directory
+          echo "Contents of kubernetes/green directory:"
+          ls -l kubernetes/green
+          
+          # Check if files exist before applying
+          for file in trading-deployment.yaml wallet-deployment.yaml account-management-deployment.yaml api-gateway-deployment.yaml; do
+            if [ -f "kubernetes/green/$file" ]; then
+              echo "Applying $file"
+              kubectl --kubeconfig=kubeconfig.yaml apply -f kubernetes/green/$file
+            else
+              echo "Error: kubernetes/green/$file does not exist"
+              exit 1
+            fi
+          done
+    # - name: Deploy to Green Environment
+    #   env:
+    #     KUBECONFIG: ${{ secrets.KUBECONFIG }}
+    #   run: |
+    #     echo "$KUBECONFIG" > kubeconfig.yaml
+    #     kubectl --kubeconfig=kubeconfig.yaml apply -f kubernetes/green/trading-deployment.yaml
+    #     kubectl --kubeconfig=kubeconfig.yaml apply -f kubernetes/green/wallet-deployment.yaml
+    #     kubectl --kubeconfig=kubeconfig.yaml apply -f kubernetes/green/account-management-deployment.yaml
+    #     kubectl --kubeconfig=kubeconfig.yaml apply -f kubernetes/green/api-gateway-deployment.yaml
 
     - name: Wait for rollouts
       run: |
