@@ -36,7 +36,7 @@ jobs:
         done
 
     - name: Set up Kubernetes CLI
-      uses: azure/setup-kubectl@v4
+      uses: azure/setup-kubectl@v1
       with:
         version: '1.24.0'
 
