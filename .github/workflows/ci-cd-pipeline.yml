@@ -35,10 +35,10 @@ jobs:
           docker push dilshan1/$service:latest
         done
 
-    # - name: Set up Kubernetes CLI
-    #   uses: azure/setup-kubectl@v4
-    #   with:
-    #     version: '1.24.0'
+    - name: Set up Kubernetes CLI
+      uses: azure/setup-kubectl@v4
+      with:
+        version: '1.24.0'
 
     - name: Deploy to Green Environment
       env:
