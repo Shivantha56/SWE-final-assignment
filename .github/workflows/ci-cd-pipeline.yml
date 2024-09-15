@@ -44,35 +44,50 @@ jobs:
       with:
         version: 'latest' # or a specific version like '1.26.0'
 
+    - name: Create Kubernetes directory structure
+      run: |
+        mkdir -p kubernetes/green
+        echo "Created kubernetes/green directory"
+        ls -R kubernetes
+      
+    - name: Create sample deployment files
+      run: |
+        for service in trading wallet account-management api-gateway; do
+          cat <<EOF > kubernetes/green/${service}-deployment.yaml
+        apiVersion: apps/v1
+        kind: Deployment
+        metadata:
+          name: ${service}
+          namespace: green
+        spec:
+          replicas: 1
+          selector:
+            matchLabels:
+              app: ${service}
+            template:
+              metadata:
+              labels:
+                app: ${service}
+              spec:
+                containers:
+                - name: ${service}
+                  image: dilshan1/${service}:latest
+                  ports:
+                  - containerPort: 80
+          EOF
+            echo "Created ${service}-deployment.yaml"
+          done
+          ls -l kubernetes/green
+
     - name: Deploy to Green Environment
       env:
         KUBECONFIG: ${{ secrets.KUBECONFIG }}
       run: |
-          echo "$KUBECONFIG" > kubeconfig.yaml
-          
-          # List contents of kubernetes/green directory
-          echo "Contents of kubernetes/green directory:"
-          ls -l kubernetes/green
-          
-          # Check if files exist before applying
-          for file in trading-deployment.yaml wallet-deployment.yaml account-management-deployment.yaml api-gateway-deployment.yaml; do
-            if [ -f "kubernetes/green/$file" ]; then
-              echo "Applying $file"
-              kubectl --kubeconfig=kubeconfig.yaml apply -f kubernetes/green/$file
-            else
-              echo "Error: kubernetes/green/$file does not exist"
-              exit 1
-            fi
-          done
-    # - name: Deploy to Green Environment
-    #   env:
-    #     KUBECONFIG: ${{ secrets.KUBECONFIG }}
-    #   run: |
-    #     echo "$KUBECONFIG" > kubeconfig.yaml
-    #     kubectl --kubeconfig=kubeconfig.yaml apply -f kubernetes/green/trading-deployment.yaml
-    #     kubectl --kubeconfig=kubeconfig.yaml apply -f kubernetes/green/wallet-deployment.yaml
-    #     kubectl --kubeconfig=kubeconfig.yaml apply -f kubernetes/green/account-management-deployment.yaml
-    #     kubectl --kubeconfig=kubeconfig.yaml apply -f kubernetes/green/api-gateway-deployment.yaml
+        echo "$KUBECONFIG" > kubeconfig.yaml
+        kubectl --kubeconfig=kubeconfig.yaml apply -f kubernetes/green/trading-deployment.yaml
+        kubectl --kubeconfig=kubeconfig.yaml apply -f kubernetes/green/wallet-deployment.yaml
+        kubectl --kubeconfig=kubeconfig.yaml apply -f kubernetes/green/account-management-deployment.yaml
+        kubectl --kubeconfig=kubeconfig.yaml apply -f kubernetes/green/api-gateway-deployment.yaml
 
     - name: Wait for rollouts
       run: |
