@@ -10,6 +10,14 @@ jobs:
     runs-on: ubuntu-latest # virtual machine
 
     steps:
+
+    - name: Install kubectl
+      run: |
+        curl -LO "https://dl.k8s.io/release/v1.22.0/bin/linux/amd64/kubectl"
+        chmod +x ./kubectl
+        sudo mv ./kubectl /usr/local/bin/kubectl
+        kubectl version --client  
+         
     - name: Checkout code
       uses: actions/checkout@v2
 
@@ -86,3 +94,5 @@ jobs:
     - name: Clean up
       run: |
         rm -f kubeconfig.yaml
+
+        
